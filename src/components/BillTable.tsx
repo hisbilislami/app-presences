@@ -1,56 +1,23 @@
 import {
-  createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React from "react";
+import CustomColumnDef from "../etc/CustomColumnDef";
 
-type TableReader = {
-  firstName: string;
-  surname: string;
-  age: number;
-  gender: string;
-};
+interface TableProps<T> {
+  data: T[];
+  columns: CustomColumnDef<T>[];
+  total: number;
+}
 
-const BillTable: React.FC = () => {
-  const data: TableReader[] = [
-    {
-      firstName: "Jane",
-      surname: "Doe",
-      age: 13,
-      gender: "Female",
-    },
-    {
-      firstName: "John",
-      surname: "Doe",
-      age: 43,
-      gender: "Male",
-    },
-    {
-      firstName: "Tom",
-      surname: "Doe",
-      age: 89,
-      gender: "Male",
-    },
-  ];
-
-  const columnHelper = createColumnHelper<TableReader>();
-
-  const columns = [
-    columnHelper.accessor((row) => `${row.firstName} ${row.surname}`, {
-      id: "fullName",
-      header: "Full Name",
-    }),
-    columnHelper.accessor("gender", {
-      header: "Gender",
-    }),
-  ];
-
+const BillTable = <T,>({ data, columns, total }: TableProps<T>) => {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    manualPagination: true, //turn off client-side pagination
+    rowCount: total,
   });
 
   return (
@@ -64,13 +31,17 @@ const BillTable: React.FC = () => {
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <th id={header.id} key={header.id}>
+                      <th
+                        id={header.id}
+                        key={header.id}
+                        className={header.column.columnDef.meta?.className}
+                      >
                         {" "}
                         {header.isPlaceholder
                           ? null
                           : flexRender(
                               header.column.columnDef.header,
-                              header.getContext(),
+                              header.getContext()
                             )}
                       </th>
                     );
@@ -85,10 +56,13 @@ const BillTable: React.FC = () => {
                 <tr key={row.id}>
                   {row.getVisibleCells().map((cell) => {
                     return (
-                      <td key={cell.id}>
+                      <td
+                        key={cell.id}
+                        className={cell.column.columnDef.meta?.className}
+                      >
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext(),
+                          cell.getContext()
                         )}
                       </td>
                     );
